@@ -24,7 +24,10 @@ void getGLErrors(void);
 void printShaderErrors(unsigned int shader);
 
 //Textures
+//Load a texture into memory
 unsigned int loadTexture(const char *texPath);
+//Activate a texture
+void activateTexture(unsigned int tex, unsigned int binding);
 #endif
 
 #define INCLUDE_GL_FUNC

@@ -1,4 +1,5 @@
 #ifndef INCLUDE_LEVEL
+#include "sprite.h"
 #define PASSAGE_LENGTH 26
 #define MIN_ROOM_SIZE 8
 #define MAX_ROOM_SIZE 24
@@ -18,6 +19,11 @@ typedef struct
 	int width, height;
 	//Tiles - these represent the map	
 	enum Tile* tiles;
+	//Random values	
+	short* randVals;
+
+	//Player sprite
+	struct Sprite player;	
 } Level;
 
 //Pass in the seed and level number

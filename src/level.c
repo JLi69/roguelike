@@ -14,6 +14,7 @@ Level* genLevel(int seed, int levelNum)
 	level->width = (96 + 16 * levelNum) + rand() % (64 + 8 * levelNum); 
 	level->height = (96 + 16 * levelNum) + rand() % (64 + 8 * levelNum);
 	level->tiles = (enum Tile*)malloc(level->width * level->height * sizeof(enum Tile));
+	level->randVals = (short*)malloc(level->width * level->height * sizeof(int));
 
 	//Fill in the level tiles
 	for(int i = 0; i < level->width * level->height; i++)
@@ -73,8 +74,8 @@ Level* genLevel(int seed, int levelNum)
 				maxX = changeX[direction] > 0 ? x + changeX[direction] : x,
 				maxY = changeY[direction] > 0 ? y + changeY[direction] : y;
 
-			for(int i = minX; i <= maxX; i++)
-				for(int j = minY; j <= maxY; j++)
+			for(int i = minX - 1; i <= maxX + 1; i++)
+				for(int j = minY - 1; j <= maxY + 1; j++)
 					level->tiles[i + j * level->width] = FLOOR;
 
 			//Push the new position onto the stack
@@ -88,7 +89,7 @@ Level* genLevel(int seed, int levelNum)
 			stack_pop(cells);
 
 			//Check if the cell is a dead end
-			const int indexOffset[] = { -1, 1, -level->width, level->width };
+			const int indexOffset[] = { -2, 2, -2 * level->width, 2 * level->width };
 			int count = 0;
 			for(int i = 0; i < 4; i++)
 				if(level->tiles[x + y * level->width + indexOffset[i]] == FLOOR)
@@ -172,6 +173,9 @@ Level* genLevel(int seed, int levelNum)
 		}
 	}
 
+	for(int i = 0; i < level->width * level->height; i++)
+		level->randVals[i] = rand() % 64;
+
 	//Deallocate the stacks
 	stack_destroy(potentialRooms);
 	stack_destroy(deadEnds);
@@ -184,12 +188,16 @@ Level* genLevel(int seed, int levelNum)
 	//	if(i % level->width == level->width - 1)
 	//		putchar('\n');
 	//}		
-	
+
+	//Player sprite
+	level->player = createSprite((float)startX, (float)startY, 1.0f, 1.0f);
+
 	return level;
 }
 
 void destroyLevel(Level *level)
 {
-	free(level->tiles);	
+	free(level->tiles);
+	free(level->randVals);
 	free(level);
 }

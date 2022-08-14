@@ -194,3 +194,9 @@ unsigned int loadTexture(const char *path)
 
 	return tex;
 }
+
+void activateTexture(unsigned int tex, unsigned int binding)
+{
+	glActiveTexture(binding);
+	glBindTexture(GL_TEXTURE_2D, tex);
+}
