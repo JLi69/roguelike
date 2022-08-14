@@ -1,4 +1,5 @@
 #include "sprite.h"
+#include <math.h>
 
 struct Sprite createSprite(float x, float y, float width, float height)
 {
@@ -12,13 +13,24 @@ struct Sprite createSprite(float x, float y, float width, float height)
 	spr.width = width;
 	spr.height = height;
 
+	spr.animation = IDLE_DOWN;
+	spr.frame = 0;
+
 	return spr;
 }
 
 int colliding(struct Sprite s1, struct Sprite s2)
 {
 	return s1.x - s1.width / 2.0f < s2.x + s2.width / 2.0f &&
-		   s1.x + s1.width / 2.0f >= s2.x - s2.width / 2.0f &&
+		   s1.x + s1.width / 2.0f > s2.x - s2.width / 2.0f &&
 		   s1.y - s1.height / 2.0f < s2.y + s2.height / 2.0f &&
-		   s1.y + s1.height / 2.0f >= s2.y - s2.height / 2.0f;
+		   s1.y + s1.height / 2.0f > s2.y - s2.height / 2.0f;
+}
+
+void updateAnimationFrame(struct Sprite *spr, float totalTime)
+{	
+	if((int)floorf(totalTime / 0.25f) % 2 == 0)
+		spr->frame = 0;
+	else if((int)floorf(totalTime / 0.25f) % 2 == 1)
+		spr->frame = 1;
 }

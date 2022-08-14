@@ -2,7 +2,7 @@
 #include "sprite.h"
 #define PASSAGE_LENGTH 26
 #define MIN_ROOM_SIZE 8
-#define MAX_ROOM_SIZE 24
+#define MAX_ROOM_SIZE 16
 
 enum Tile
 {

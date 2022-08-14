@@ -82,8 +82,13 @@ void display(Level *level)
 	{
 		float x = (float)(i % level->width) * TILE_SIZE - TILE_SIZE * level->player.x,
 			  y = (float)(i / level->width) * TILE_SIZE - TILE_SIZE * level->player.y;
-		glUniform2f(glGetUniformLocation(shader, "uOffset"), x, y);	
-	
+		
+		if(x <= -16.0f * TILE_SIZE || x >= 16.0f * TILE_SIZE 
+			|| y <= -10.0f * TILE_SIZE || y >= 10.0f * TILE_SIZE)
+			continue;
+
+		glUniform2f(glGetUniformLocation(shader, "uOffset"), x, y);		
+
 		//Draw different textures for different tiles
 		switch(level->tiles[i])
 		{
@@ -106,30 +111,62 @@ void display(Level *level)
 	//Draw the player	
 	activateTexture(sprites, GL_TEXTURE0);	
 	glUniform2f(glGetUniformLocation(shader, "uOffset"), 0.0f, 0.0f);
-	glUniform2f(glGetUniformLocation(shader, "uTexOffset"), 0.0f, 15.0f / 16.0f);	
+	glUniform2f(glGetUniformLocation(shader, "uTexOffset"), 
+									 0.0f + 1.0f / 16.0f * (float)level->player.frame +
+									 (float)level->player.animation * 2.0f * 1.0f / 16.0f,
+									 15.0f / 16.0f);	
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	getGLErrors();
 }
 
-void update(Level *level)
+void update(Level *level, clock_t start)
 {
-	//Check the player's movement	
+	static float totalTime = 0.0f;
+
+	//move the player
 	if(checkKey(GLFW_KEY_W))
-		level->player.dY = 0.12f;
-	else if(checkKey(GLFW_KEY_S))
-		level->player.dY = -0.12f;
+	{
+		level->player.animation = MOVING_UP;	
+		level->player.dY = PLAYER_SPEED;
+	}
+	else if(checkKey(GLFW_KEY_S)) 
+	{
+		level->player.animation = MOVING_DOWN;	
+		level->player.dY = -PLAYER_SPEED;
+	}
 	else
+	{
+		if(level->player.dY < 0.0f)
+			level->player.animation = IDLE_DOWN;
+		if(level->player.dY > 0.0f)
+			level->player.animation = IDLE_UP;
 		level->player.dY = 0.0f;
+	}
 	
 	if(checkKey(GLFW_KEY_A))
-		level->player.dX = -0.12f;	
+	{
+		level->player.animation = MOVING_LEFT;	
+		level->player.dX = -PLAYER_SPEED;
+	}
 	else if(checkKey(GLFW_KEY_D))
-		level->player.dX = 0.12f;
+	{
+		level->player.animation = MOVING_RIGHT;	
+		level->player.dX = PLAYER_SPEED;
+	}
 	else
+	{
+		if(level->player.dX < 0.0f)
+			level->player.animation = IDLE_LEFT;
+		if(level->player.dX > 0.0f)
+			level->player.animation = IDLE_RIGHT;
 		level->player.dX = 0.0f;
+	}
 
-	level->player.x += level->player.dX;
+	static clock_t end;
+	static float timePassed = 0.0f;	
+
+	level->player.x += level->player.dX * timePassed;
 	//Player collision
 	float playerGridX = floorf(level->player.x),
 		  playerGridY = floorf(level->player.y);
@@ -143,12 +180,20 @@ void update(Level *level)
 			{	
 				//Check if there is a tile there
 				int index = (int)i + (int)j * level->width;
+				float diffX;
+				if(level->player.x < i)		
+					diffX = (level->player.x + 0.5f) - (i - 0.5f); 
+				else if(level->player.x > i)
+					diffX = (level->player.x - 0.5f) - (i + 0.5f);
+
 				if(level->tiles[index] == WALL)
-					level->player.x -= level->player.dX;	
+					level->player.x -= diffX;	
 			}
 		}
 	}
-	level->player.y += level->player.dY;	
+
+	level->player.y += level->player.dY * timePassed;	
+	
 	playerGridX = floorf(level->player.x);
 	playerGridY = floorf(level->player.y);	
 	for(float i = playerGridX - 1; i <= playerGridX + 1; i++)
@@ -161,9 +206,23 @@ void update(Level *level)
 			{	
 				//Check if there is a tile there
 				int index = (int)i + (int)j * level->width;
+				float diffY;
+				if(level->player.y < j)	
+					diffY = (level->player.y + 0.5f) - (j - 0.5f);
+				else if(level->player.y > j)
+					diffY = (level->player.y - 0.5f) - (j + 0.5f);
+
 				if(level->tiles[index] == WALL)
-					level->player.y -= level->player.dY;	
+					level->player.y -= diffY;	
 			}
 		}
 	}
+
+	end = clock();
+	while((float)(end - start) / (float)CLOCKS_PER_SEC <= 1.0f / MAX_FPS)
+		end = clock();
+	timePassed = (float)(end - start) / (float)CLOCKS_PER_SEC;
+	updateAnimationFrame(&level->player, totalTime);
+
+	totalTime += timePassed;
 }

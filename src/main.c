@@ -8,6 +8,7 @@
 #include "structs.h"
 #include "level.h"
 #include "roguelike.h"
+#include <time.h>
 
 /*
  * TODO List:
@@ -43,7 +44,7 @@
 int main(void)
 {
 	//Test level
-	Level* level = genLevel(50, 0);		
+	Level* level = genLevel(0, 0);		
 
 	GLFWwindow* win = initWindow();
 	if(!win) return -1;	
@@ -52,14 +53,17 @@ int main(void)
 	//Main loop
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	clock_t frameStart = clock();	
 	while(!glfwWindowShouldClose(win))
 	{
-		display(level);		
-		update(level);
-
+		display(level);
 		//GLFW stuff
 		glfwSwapBuffers(win);
 		glfwPollEvents();
+
+		update(level, frameStart);
+
+		frameStart = clock();
 	}
 	//Deallocate memory when program ends
 	glfwTerminate();	

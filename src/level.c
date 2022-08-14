@@ -16,6 +16,10 @@ Level* genLevel(int seed, int levelNum)
 	level->tiles = (enum Tile*)malloc(level->width * level->height * sizeof(enum Tile));
 	level->randVals = (short*)malloc(level->width * level->height * sizeof(int));
 
+	short* timesVisited = (short*)malloc(level->width * level->height * sizeof(short));
+	for(int i = 0; i < level->width * level->height; i++)
+		timesVisited[i] = 0;
+
 	//Fill in the level tiles
 	for(int i = 0; i < level->width * level->height; i++)
 		level->tiles[i] = WALL;
@@ -58,13 +62,15 @@ Level* genLevel(int seed, int levelNum)
 			   x + diffX >= level->width - MAX_ROOM_SIZE / 2 - 1 ||
 			   y + diffY >= level->height - MAX_ROOM_SIZE / 2 - 1)
 				continue;	
-			//Make sure that it hasn't been visited already
-			if(level->tiles[(x + diffX) + (y + diffY) * level->width] != FLOOR)
+			//Make sure that it hasn't been visited already (can only visit a cell up to 2 times)
+			//if(level->tiles[(x + diffX) + (y + diffY) * level->width] != FLOOR)
+			if(timesVisited[(x + diffX) + (y + diffY) * level->width] < 2)
 			{
+				timesVisited[(x + diffX) + (y + diffY) * level->width]++;	
 				found = 1;
 				direction = potentialDirection;
-			}
-		}
+			}	
+		} 
 
 		//Found a cell, "carve" a hallway to there
 		if(found)
@@ -80,13 +86,14 @@ Level* genLevel(int seed, int levelNum)
 
 			//Push the new position onto the stack
 			stack_push(cells, x + changeX[direction]);
-			stack_push(cells, y + changeY[direction]);	
+			stack_push(cells, y + changeY[direction]);
+			
 		}
 		//Didn't find a cell, pop off the cell at the top of the stack
 		else if(!found)
 		{
 			stack_pop(cells);
-			stack_pop(cells);
+			stack_pop(cells);		
 
 			//Check if the cell is a dead end
 			const int indexOffset[] = { -2, 2, -2 * level->width, 2 * level->width };
@@ -135,7 +142,7 @@ Level* genLevel(int seed, int levelNum)
 
 		//Generate a random room half the time
 		if(rand() % 2 == 0 || (x == startX && y == startY))
-		{
+		{	
 			//Generate a random size for the room	
 			int width = rand() % (MAX_ROOM_SIZE / 2 + 1 - MIN_ROOM_SIZE / 2) + MIN_ROOM_SIZE / 2,
 				height = rand() % (MAX_ROOM_SIZE / 2 + 1 - MIN_ROOM_SIZE / 2) + MIN_ROOM_SIZE / 2;
@@ -179,6 +186,8 @@ Level* genLevel(int seed, int levelNum)
 	//Deallocate the stacks
 	stack_destroy(potentialRooms);
 	stack_destroy(deadEnds);
+
+	free(timesVisited);
 
 	//For debug purposes, print out the level
 	//for(int i = 0; i < level->width * level->height; i++)
