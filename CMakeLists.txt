@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-set(CMAKE_C_FLAGS "-O0 -static-libgcc")
+set(CMAKE_C_FLAGS "-O2 -static-libgcc")
 
 project(roguelike)
 

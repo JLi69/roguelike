@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <SOIL2/SOIL2.h>
 
+//Current shader program being used
+static int currentShaderProgram = 0;
+
 unsigned int createSquareVertBuffer(void)
 {
 	static const float squareVerts[] = 
@@ -103,7 +106,7 @@ unsigned int readShaderFile(const char *path, int type)
 	//Mark all the characters as spaces
 	for(int i = 0; i < 4096; i++) src[i] = ' ';	
 	//Read the file
-	while((*ptr++ = getc(srcFile)) != EOF);	
+	while((*ptr++ = getc(srcFile)) != EOF);
 
 	//printf("%s\n", src);
 
@@ -176,6 +179,17 @@ unsigned int createShaderProgram(const char *vertPath, const char *fragPath)
 	glDetachShader(program, frag);	
 
 	return program;
+}
+
+void useProgram(unsigned int program)
+{
+	glUseProgram(program);
+	currentShaderProgram = program;
+}
+
+unsigned int getActiveProgram(void)
+{
+	return currentShaderProgram;
 }
 
 unsigned int loadTexture(const char *path)

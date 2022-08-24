@@ -2,12 +2,41 @@
 #include <stdlib.h>
 #include "structs.h"
 #include <stdio.h>
+#include <math.h>
 
-Level* genLevel(int seed, int levelNum)
+void addEnemy(Level *level, struct Enemy enemy)
+{
+	//Enough room for the enemy
+	if(level->enemyCount < level->maxEnemyCount)
+		level->enemies[level->enemyCount++] = enemy;
+	else if(level->enemyCount >= level->maxEnemyCount)
+	{
+		//Temporary array to store the enemies	
+		struct Enemy* temp = (struct Enemy*)malloc(level->enemyCount * sizeof(struct Enemy));
+		for(int i = 0; i < level->enemyCount; i++)
+			temp[i] = level->enemies[i];
+		
+		//Expand the array
+		free(level->enemies);
+		level->maxEnemyCount *= 2;	
+		level->enemies = (struct Enemy*)malloc(level->maxEnemyCount * sizeof(struct Enemy));
+
+		//Copy the enemies back into the array
+		for(int i = 0; i < level->enemyCount; i++)
+			level->enemies[i] = temp[i];
+
+		level->enemies[level->enemyCount++] = enemy;
+
+		free(temp);
+	}
+}
+
+Level* genLevel(unsigned int seed, int levelNum)
 {
 	//Allocate memory for a level	
 	Level* level = (Level*)malloc(sizeof(Level));
 
+	//Set the seed of the level
 	srand(seed);
 
 	//Generate the size of the level
@@ -16,6 +45,12 @@ Level* genLevel(int seed, int levelNum)
 	level->tiles = (enum Tile*)malloc(level->width * level->height * sizeof(enum Tile));
 	level->randVals = (short*)malloc(level->width * level->height * sizeof(int));
 
+	//Allocate memory for enemies
+	level->enemies = (struct Enemy*)malloc(sizeof(struct Enemy));
+	level->enemyCount = 0;
+	level->maxEnemyCount = 1;
+
+	//Array to keep track of how many times a cell was visited
 	short* timesVisited = (short*)malloc(level->width * level->height * sizeof(short));
 	for(int i = 0; i < level->width * level->height; i++)
 		timesVisited[i] = 0;
@@ -25,8 +60,8 @@ Level* genLevel(int seed, int levelNum)
 		level->tiles[i] = WALL;
 
 	//Generate hallways		
-	int startX = rand() % (level->width - MAX_ROOM_SIZE - 2) + MAX_ROOM_SIZE / 2 + 1,
-		startY = rand() % (level->height - MAX_ROOM_SIZE - 2) + MAX_ROOM_SIZE / 2 + 1;	
+	int startX = rand() % (level->width - MAX_ROOM_SIZE * 2 - 3) + MAX_ROOM_SIZE + 2,
+		startY = rand() % (level->height - MAX_ROOM_SIZE * 2 - 3) + MAX_ROOM_SIZE + 2;	
 	Stack* cells = stack_create();
 	Stack* deadEnds = stack_create();
 	Stack* potentialRooms = stack_create();
@@ -57,10 +92,10 @@ Level* genLevel(int seed, int levelNum)
 				diffX = changeX[potentialDirection], diffY = changeY[potentialDirection];
 			
 			//Check to make sure the cell is within bounds
-			if(x + diffX < MAX_ROOM_SIZE / 2 + 1 || 
-			   y + diffY < MAX_ROOM_SIZE / 2 + 1 || 
-			   x + diffX >= level->width - MAX_ROOM_SIZE / 2 - 1 ||
-			   y + diffY >= level->height - MAX_ROOM_SIZE / 2 - 1)
+			if(x + diffX < MAX_ROOM_SIZE / 2 + 2 || 
+			   y + diffY < MAX_ROOM_SIZE / 2 + 2 || 
+			   x + diffX >= level->width - MAX_ROOM_SIZE / 2 - 2 ||
+			   y + diffY >= level->height - MAX_ROOM_SIZE / 2 - 2)
 				continue;	
 			//Make sure that it hasn't been visited already (can only visit a cell up to 2 times)
 			//if(level->tiles[(x + diffX) + (y + diffY) * level->width] != FLOOR)
@@ -141,7 +176,7 @@ Level* genLevel(int seed, int levelNum)
 			x = stack_pop(potentialRooms);
 
 		//Generate a random room half the time
-		if(rand() % 2 == 0 || (x == startX && y == startY))
+		if(rand() % 2 == 0 || (x == startX && y == startY) || stack_empty(potentialRooms))
 		{	
 			//Generate a random size for the room	
 			int width = rand() % (MAX_ROOM_SIZE / 2 + 1 - MIN_ROOM_SIZE / 2) + MIN_ROOM_SIZE / 2,
@@ -150,6 +185,10 @@ Level* genLevel(int seed, int levelNum)
 			for(int i = y - height; i <= y + height; i++)
 				for(int j = x - width; j <= x + width; j++)
 					level->tiles[i * level->width + j] = FLOOR;
+
+			//Generate the exit if it is the last room
+			if(stack_empty(potentialRooms))
+				level->tiles[rand() % (width * 2) + x - width + (rand() % (2 * height) + y - height) * level->width] = EXIT;
 		}	
 	}
 
@@ -180,8 +219,36 @@ Level* genLevel(int seed, int levelNum)
 		}
 	}
 
+	//Randomly place items around the map
 	for(int i = 0; i < level->width * level->height; i++)
-		level->randVals[i] = rand() % 64;
+	{
+		if(rand() % 128 == 0 && level->tiles[i] == FLOOR)
+		{
+			if(levelNum >= 8)
+			{
+				level->tiles[i] = CHEST_MONSTER;
+				continue;
+			}
+
+			if(rand() % (16 - 2 * levelNum) == 0)	level->tiles[i] = CHEST_MONSTER;
+			else level->tiles[i] = CHEST;
+		}
+		else if(rand() % 16 == 0 && i / level->width % 3 == 0 && (i % level->width) % 3 == 0 && level->tiles[i] == FLOOR &&
+				(i / level->width != startY || i % level->width != startX)) //Don't spawn spike trap where player starts
+		{
+			level->tiles[i] = SPIKE_TRAP_INACTIVE;
+		}
+	}
+
+	for(int i = 0; i < level->width * level->height; i++)
+		level->randVals[i] = rand() % 64;	
+
+	//Generate the enemies
+	for(int i = 0; i < level->width; i++)
+		for(int j = 0; j < level->height; j++)
+			if(level->tiles[i + j * level->width] == FLOOR && rand() % 72 == 0 &&
+				(labs(startX - i) > 6 || labs(startY - j) > 6)) //Don't spawn too close the player
+				addEnemy(level, createEnemy(createSprite(i, j, 1.0f, 1.0f), SLIME));	
 
 	//Deallocate the stacks
 	stack_destroy(potentialRooms);
@@ -189,17 +256,24 @@ Level* genLevel(int seed, int levelNum)
 
 	free(timesVisited);
 
-	//For debug purposes, print out the level
-	//for(int i = 0; i < level->width * level->height; i++)
-	//{
-	//	const char tileCh[] = { ' ', '.', '#' };
-	//	putchar(tileCh[level->tiles[i]]);
-	//	if(i % level->width == level->width - 1)
-	//		putchar('\n');
-	//}		
+#if 0
+	//For debug purposes, print out the level	
+	for(int i = 0; i < level->width * level->height; i++)
+	{
+		const char tileCh[] = { ' ', '.', '#', 'E' };
+		putchar(tileCh[level->tiles[i]]);
+		if(i % level->width == level->width - 1)
+			putchar('\n');
+	}
+#endif
 
 	//Player sprite
-	level->player = createSprite((float)startX, (float)startY, 1.0f, 1.0f);
+	level->player.spr = createSprite((float)startX, (float)startY, 1.0f, 1.0f);
+	level->player.health = 10;
+	level->player.maxHealth = 10;
+	level->player.score = 0;	
+
+	level->state = PLAYING;
 
 	return level;
 }
@@ -207,6 +281,62 @@ Level* genLevel(int seed, int levelNum)
 void destroyLevel(Level *level)
 {
 	free(level->tiles);
+	free(level->enemies);
 	free(level->randVals);
 	free(level);
+}
+
+void bfs(int *stepsToGoal, Level level)
+{
+	int* tileQueue = (int*)malloc(sizeof(int) * level.width * level.height * 3);
+	int* added = (int*)malloc(sizeof(int) * level.width * level.height);
+	int first = 0, last = 0;
+
+	for(int i = 0; i < level.width * level.height; i++)
+		added[i] = 0;
+	for(int i = 0; i < level.width * level.height; i++)
+		stepsToGoal[i] = -1;
+
+	//Add the initial tile to the tile queue
+	tileQueue[last++] = (int)floorf(level.player.spr.x);
+	tileQueue[last++] = (int)floorf(level.player.spr.y);
+	tileQueue[last++] = 0;
+	added[32 + 32 * 65] = 1;
+
+	//Keep doing the bfs until queue is empty
+	static const int diffX[] = { 1,  -1, 0,  0 };
+	static const int diffY[] = { 0,   0, 1, -1 };
+	
+	while(last > first)
+	{
+		int tileX = tileQueue[first++],
+			tileY = tileQueue[first++],
+			steps = tileQueue[first++];
+
+		int tileIndex = tileX + tileY * level.width;
+		stepsToGoal[tileIndex] = steps;
+
+		for(int i = 0; i < 4; i++)
+		{
+			int newTileIndex = (tileX + diffX[i]) + (tileY + diffY[i]) * level.width;
+			if(newTileIndex < 0 || newTileIndex >= level.width * level.height)
+				continue;
+			if(level.tiles[newTileIndex] != FLOOR && 
+			   level.tiles[newTileIndex] != SPIKE_TRAP_INACTIVE &&
+			   level.tiles[newTileIndex] != SPIKE_TRAP_ACTIVE)
+				continue;
+			if(added[newTileIndex])
+				continue;
+			if(stepsToGoal[newTileIndex] != -1)
+				continue;
+			
+			tileQueue[last++] = tileX + diffX[i];
+			tileQueue[last++] = tileY + diffY[i];
+			tileQueue[last++] = steps + 1;
+			added[newTileIndex] = 1;
+		}
+	}
+
+	free(tileQueue);
+	free(added);
 }

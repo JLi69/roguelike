@@ -1,5 +1,6 @@
 #ifndef INCLUDE_LEVEL
 #include "sprite.h"
+#include "enemy.h" 
 #define PASSAGE_LENGTH 26
 #define MIN_ROOM_SIZE 8
 #define MAX_ROOM_SIZE 16
@@ -8,7 +9,20 @@ enum Tile
 {
 	EMPTY,
 	FLOOR,
-	WALL
+	WALL,
+	EXIT,
+	CHEST,
+	CHEST_MONSTER,
+	OPEN_CHEST,
+	SPIKE_TRAP_INACTIVE,
+	SPIKE_TRAP_ACTIVE
+};
+
+enum GameState
+{
+	PLAYING,
+	DEAD,
+	NEXT_LEVEL
 };
 
 //Level
@@ -19,19 +33,28 @@ typedef struct
 	int width, height;
 	//Tiles - these represent the map	
 	enum Tile* tiles;
+	enum GameState state;
+	//Array of enemies
+	struct Enemy* enemies;	
+	int enemyCount, maxEnemyCount;	
 	//Random values	
 	short* randVals;
 
 	//Player sprite
-	struct Sprite player;	
+	struct Player player;	
 } Level;
 
+//Add an enemy to a level
+void addEnemy(Level *level,  struct Enemy enemy);
 //Pass in the seed and level number
 //As level number gets bigger, the level gets larger
 //and more enemies and traps get generated
-Level* genLevel(int seed, int levelNum);
+Level* genLevel(unsigned int seed, int levelNum);
 //Deallocate memory that represents a level
 void destroyLevel(Level *level);
+//Output an array of values that represent the number of steps it will take
+//to get to the player from a point using bfs
+void bfs(int *stepsToGoal, Level level);
 
 #endif
 

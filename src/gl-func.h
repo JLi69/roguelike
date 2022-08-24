@@ -18,6 +18,10 @@ void bindGLObj(GLBufferObj *obj);
 //Shaders
 unsigned int readShaderFile(const char *path, int type);
 unsigned int createShaderProgram(const char *vertPath, const char *fragPath);
+//Updates the active shader program variable
+void useProgram(unsigned int program);
+//Returns the active shader program variable
+unsigned int getActiveProgram(void);
 
 //Output any OpenGL errors for debugging
 void getGLErrors(void);

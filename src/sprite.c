@@ -1,6 +1,8 @@
 #include "sprite.h"
 #include <math.h>
 
+#define ANIMATION_TIME 0.5f
+
 struct Sprite createSprite(float x, float y, float width, float height)
 {
 	struct Sprite spr;
@@ -29,8 +31,8 @@ int colliding(struct Sprite s1, struct Sprite s2)
 
 void updateAnimationFrame(struct Sprite *spr, float totalTime)
 {	
-	if((int)floorf(totalTime / 0.25f) % 2 == 0)
+	if((int)floorf(totalTime / ANIMATION_TIME) % 2 == 0)
 		spr->frame = 0;
-	else if((int)floorf(totalTime / 0.25f) % 2 == 1)
+	else if((int)floorf(totalTime / ANIMATION_TIME) % 2 == 1)
 		spr->frame = 1;
 }

@@ -8,6 +8,7 @@
 #include "structs.h"
 #include "level.h"
 #include "roguelike.h"
+#include <sys/time.h>
 #include <time.h>
 
 /*
@@ -20,10 +21,17 @@
  *  - Level generation
  *		- Generate a maze of hallways [DONE]
  *		- Generate rooms randomly throughout the hallways [DONE]
+ *			- Rooms are bit boring, fill them up with something?
+ *				- Room Types?
+ *					- Slime Room
+ *					- Spider Room
+ *					- Graveyard
+ *					- Garden
+ *					- Prison
  *		- Generate enemy locations
  *		- Generate power up locations
  *		- Generate loot locations 
- *		- Levels get bigger and have more enemies the farther you adventure
+ *		- Levels get bigger and have more enemies the farther you adventure [DONE]
  *			- 10 total levels
  *  - Enemies	
  *		- Slime (weakest)
@@ -44,7 +52,9 @@
 int main(void)
 {
 	//Test level
-	Level* level = genLevel(0, 0);		
+	int levelNum = 0; 
+	unsigned int seed = time(NULL);
+	Level* level = genLevel(seed, levelNum);		
 
 	GLFWwindow* win = initWindow();
 	if(!win) return -1;	
@@ -53,7 +63,8 @@ int main(void)
 	//Main loop
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	clock_t frameStart = clock();	
+	struct timeval frameStart;
+	gettimeofday(&frameStart, 0);
 	while(!glfwWindowShouldClose(win))
 	{
 		display(level);
@@ -62,8 +73,30 @@ int main(void)
 		glfwPollEvents();
 
 		update(level, frameStart);
+		
+		//Advance to the next level
+		if(level->state == NEXT_LEVEL)
+		{
+			struct Player tempPlayer = level->player; //Keep the player's stats	
+			free(level->tiles);
+			free(level->enemies);
+			free(level);	
+			level = genLevel(0, ++levelNum);
+			tempPlayer.spr = level->player.spr;
+			level->player = tempPlayer;
+		}
+		//Player died
+		else if(level->state == DEAD)
+		{
+			free(level->tiles);
+			free(level->enemies);	
+			free(level);
+			levelNum = 0;
+			seed += 2;
+			level = genLevel(seed, levelNum);	
+		}
 
-		frameStart = clock();
+		gettimeofday(&frameStart, 0);
 	}
 	//Deallocate memory when program ends
 	glfwTerminate();	
