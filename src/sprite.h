@@ -11,6 +11,12 @@ enum AnimationState
 	MOVING_LEFT = 7
 };
 
+enum Items
+{
+	COIN,
+	WOOD_SWORD
+};
+
 struct Sprite
 {
 	float x, y; //Position of the sprite
@@ -28,8 +34,17 @@ struct Player
 		score; //Score of the player
 };
 
+struct Item
+{
+	struct Sprite hitbox;
+	int value, hidden;
+	enum Items item;
+};
+
 struct Sprite createSprite(float x, float y, float width, float height);
+struct Item createItem(struct Sprite hitbox, enum Items item);
 int colliding(struct Sprite s1, struct Sprite s2);
+float spriteDist(struct Sprite s1, struct Sprite s2);
 void updateAnimationFrame(struct Sprite *spr, float totalTime);
 
 #endif

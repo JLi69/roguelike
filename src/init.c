@@ -23,7 +23,8 @@ void init(void)
 	uniforms[DEFAULT_UNIFORM_DAMAGE_COOLDOWN] = glGetUniformLocation(getShader(DEFAULT_SHADER), "uDamageCooldown");
 	uniforms[DEFAULT_UNIFORM_TEX_SIZE] = glGetUniformLocation(getShader(DEFAULT_SHADER), "uTexSize");
 	uniforms[DEFAULT_UNIFORM_TEX_FRAC] = glGetUniformLocation(getShader(DEFAULT_SHADER), "uTexFrac");
-	uniforms[DEFAULT_UNIFORM_TEX_OFFSET] = glGetUniformLocation(getShader(DEFAULT_SHADER), "uTexOffset");
+	uniforms[DEFAULT_UNIFORM_TEX_OFFSET] = glGetUniformLocation(getShader(DEFAULT_SHADER), "uTexOffset");	
+	uniforms[DEFAULT_UNIFORM_HIT_COOLDOWN] = glGetUniformLocation(getShader(DEFAULT_SHADER), "uHitCooldown");
 
 	uniforms[BACKGROUND_UNIFORM_SCALE] = glGetUniformLocation(getShader(BACKGROUND_SHADER), "uScale");
 	uniforms[BACKGROUND_UNIFORM_SCREEN_DIMENSIONS] = glGetUniformLocation(getShader(BACKGROUND_SHADER), "uScreenDimensions");

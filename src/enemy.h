@@ -1,8 +1,8 @@
 #ifndef INCLUDE_ENEMY
 #include "sprite.h"
 
-#define SLIME_MOVEMENT_TIME 0.5f
-#define SLIME_UPDATE_TIME 2.0f
+#define SLIME_MOVEMENT_TIME 0.25f
+#define SLIME_UPDATE_TIME 1.0f
 
 enum EnemyType
 {
@@ -15,9 +15,9 @@ struct Enemy
 	struct Sprite spr;
 	//Not real positoin of enemy
 	float animationX, animationY;
-	float timer;
+	float timer, damageCooldown;
 	enum EnemyType type;	
-	int health;	
+	int health;
 };
 
 struct Enemy createEnemy(struct Sprite spr, enum EnemyType type);

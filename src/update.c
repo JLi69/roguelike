@@ -12,6 +12,7 @@ void update(Level *level, struct timeval start)
 {
 	static float totalTime = 0.0f;
 	static float damageCooldown = 0.0f;
+	static float ticker = 0.0f;
 
 	//Allocate memory for the "step array"
 	if(stepsToGoal == NULL)
@@ -122,12 +123,14 @@ void update(Level *level, struct timeval start)
 					switch(level->tiles[index])
 					{
 					case CHEST:
+						level->player.score++;	
 						level->tiles[index] = OPEN_CHEST;	
 						break;
 					case EXIT:		
 						level->state = NEXT_LEVEL;	
 						break;
 					case CHEST_MONSTER:
+						level->player.score += 5;
 						addEnemy(level, createEnemy(createSprite(i, j, 1.0f, 1.0f), OPEN_CHEST_MONSTER));
 						level->tiles[index] = FLOOR;
 						damageCooldown = 0.5f;
@@ -181,8 +184,18 @@ void update(Level *level, struct timeval start)
 	
 	updateAnimationFrame(&level->player.spr, totalTime);
 
+	//Update the enemies
 	for(int i = 0; i < level->enemyCount; i++)
 	{
+		//Enemy is dead
+		if(level->enemies[i].health <= 0 && level->enemies[i].damageCooldown <= 0.0f)
+			continue;
+		else if(level->enemies[i].health <= 0 && level->enemies[i].damageCooldown > 0.0f)
+		{
+			level->enemies[i].damageCooldown -= timePassed * 4.0f; //Enemy turns red upon death and then disappears	
+			continue;
+		}
+
 		updateAnimationFrame(&level->enemies[i].spr, totalTime);
 		//Check if the player is colliding with any of them and damage the player if it is
 		if(colliding(level->player.spr, level->enemies[i].spr) && damageCooldown <= 0.0f)
@@ -191,11 +204,74 @@ void update(Level *level, struct timeval start)
 			damageCooldown = 0.5f;	
 		}
 
+		//Check if the enemy landed on certain tiles and then have them interact with thos tiles
+		if(level->enemies[i].damageCooldown <= 0.0f)
+		{
+			int index = (int)level->enemies[i].spr.x + (int)level->enemies[i].spr.y * level->width;
+			if(index < 0 || index >= level->width * level->height)
+				continue;	
+			switch(level->tiles[index])
+			{
+			case SPIKE_TRAP_INACTIVE:	level->tiles[index] = SPIKE_TRAP_ACTIVE;		break;
+			case SPIKE_TRAP_ACTIVE:		
+				level->enemies[i].health--;
+				level->enemies[i].damageCooldown = 0.5f;	
+				break;
+			default: break;
+			} 
+		}
+		level->enemies[i].damageCooldown -= timePassed;
+
 		//Update the enemy position
 		switch(level->enemies[i].type)
 		{
 		case SLIME:		updateSlime(&level->enemies[i], stepsToGoal, level->width, level->height, level->enemies, level->enemyCount, timePassed);		break;
 		default:		break;
+		}
+
+		//Drop items upon death
+		if(level->enemies[i].health <= 0)
+		{
+			//Drop coins / treasure
+			for(int j = 0; j < getEnemyScoreVal(level->enemies[i].type); j++)
+			{
+				float dist = (float)rand() / (float)RAND_MAX * 0.4f,
+					  angle = (float)rand() / (float)RAND_MAX * 3.141592653f;
+				addItem(level, createItem(createSprite(level->enemies[i].animationX + dist * cosf(angle), level->enemies[i].animationY + dist * sinf(angle), 0.5f, 0.5f), COIN));
+			}
+		}
+	}
+
+	//Update the items in the level
+	for(int i = 0; i < level->itemCount; i++)
+	{
+		if(level->items[i].hidden)
+			continue;
+
+		updateAnimationFrame(&level->items[i].hitbox, totalTime);
+		//Move the player
+		if(spriteDist(level->player.spr, level->items[i].hitbox) < 2.0f)
+		{
+			float diffX = level->player.spr.x - level->items[i].hitbox.x,
+				  diffY = level->player.spr.y - level->items[i].hitbox.y;
+			
+			float moveX = 2.0f / sqrtf(diffX * diffX + diffY * diffY) * diffX,
+				  moveY = 2.0f / sqrtf(diffX * diffX + diffY * diffY) * diffY;
+
+			level->items[i].hitbox.x += moveX * timePassed;
+			level->items[i].hitbox.y += moveY * timePassed;
+		}
+		//Player collected the item	
+		if(colliding(level->player.spr, level->items[i].hitbox))
+		{
+			level->items[i].hidden = 1;
+			switch(level->items[i].item)
+			{
+			case COIN:
+				level->player.score++;
+			default:
+				break;
+			}
 		}
 	}
 

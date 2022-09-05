@@ -37,6 +37,8 @@ typedef struct
 	//Array of enemies
 	struct Enemy* enemies;	
 	int enemyCount, maxEnemyCount;	
+	struct Item* items;
+	int itemCount, maxItemCount;
 	//Random values	
 	short* randVals;
 
@@ -45,7 +47,9 @@ typedef struct
 } Level;
 
 //Add an enemy to a level
-void addEnemy(Level *level,  struct Enemy enemy);
+void addEnemy(Level *level, struct Enemy enemy);
+//Add items to the level
+void addItem(Level *level, struct Item item);
 //Pass in the seed and level number
 //As level number gets bigger, the level gets larger
 //and more enemies and traps get generated

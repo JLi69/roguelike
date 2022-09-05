@@ -78,9 +78,7 @@ int main(void)
 		if(level->state == NEXT_LEVEL)
 		{
 			struct Player tempPlayer = level->player; //Keep the player's stats	
-			free(level->tiles);
-			free(level->enemies);
-			free(level);	
+			destroyLevel(level);
 			level = genLevel(0, ++levelNum);
 			tempPlayer.spr = level->player.spr;
 			level->player = tempPlayer;
@@ -88,9 +86,7 @@ int main(void)
 		//Player died
 		else if(level->state == DEAD)
 		{
-			free(level->tiles);
-			free(level->enemies);	
-			free(level);
+			destroyLevel(level);
 			levelNum = 0;
 			seed += 2;
 			level = genLevel(seed, levelNum);	

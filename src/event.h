@@ -10,7 +10,12 @@ void onKeyPress(GLFWwindow *win, int key, int scancode, int action, int mods);
 //Can detect up to 4 keys being pressed
 int checkKey(int key);
 
+//Note: assumes only one window is open
+int getWindowWidth(void);
+int getWindowHeight(void);
+
 //Handle window resizing
 void handleWinResize(GLFWwindow *win, int newWidth, int newHeight);
 
+#define INCLUDE_EVENT
 #endif

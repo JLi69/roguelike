@@ -24,8 +24,33 @@ void addEnemy(Level *level, struct Enemy enemy)
 		//Copy the enemies back into the array
 		for(int i = 0; i < level->enemyCount; i++)
 			level->enemies[i] = temp[i];
-
 		level->enemies[level->enemyCount++] = enemy;
+
+		free(temp);
+	}
+}
+
+void addItem(Level *level, struct Item item)
+{
+	//Enough room for the item
+	if(level->itemCount < level->maxItemCount)
+		level->items[level->itemCount++] = item;
+	else if(level->itemCount >= level->maxItemCount)
+	{
+		//Temporary array to store the items	
+		struct Item* temp = (struct Item*)malloc(level->itemCount * sizeof(struct Item));
+		for(int i = 0; i < level->itemCount; i++)
+			temp[i] = level->items[i];
+		
+		//Expand the array
+		free(level->items);
+		level->maxItemCount *= 2;	
+		level->items = (struct Item*)malloc(level->maxItemCount * sizeof(struct Item));
+
+		//Copy the items back into the array
+		for(int i = 0; i < level->itemCount; i++)
+			level->items[i] = temp[i];
+		level->items[level->itemCount++] = item;
 
 		free(temp);
 	}
@@ -49,6 +74,11 @@ Level* genLevel(unsigned int seed, int levelNum)
 	level->enemies = (struct Enemy*)malloc(sizeof(struct Enemy));
 	level->enemyCount = 0;
 	level->maxEnemyCount = 1;
+
+	//Allocate memory for items
+	level->items = (struct Item*)malloc(sizeof(struct Item));
+	level->itemCount = 0;
+	level->maxItemCount = 1;
 
 	//Array to keep track of how many times a cell was visited
 	short* timesVisited = (short*)malloc(level->width * level->height * sizeof(short));
@@ -222,7 +252,7 @@ Level* genLevel(unsigned int seed, int levelNum)
 	//Randomly place items around the map
 	for(int i = 0; i < level->width * level->height; i++)
 	{
-		if(rand() % 128 == 0 && level->tiles[i] == FLOOR)
+		if(rand() % 256 == 0 && level->tiles[i] == FLOOR)
 		{
 			if(levelNum >= 8)
 			{
@@ -282,6 +312,7 @@ void destroyLevel(Level *level)
 {
 	free(level->tiles);
 	free(level->enemies);
+	free(level->items);
 	free(level->randVals);
 	free(level);
 }
@@ -328,6 +359,8 @@ void bfs(int *stepsToGoal, Level level)
 			if(added[newTileIndex])
 				continue;
 			if(stepsToGoal[newTileIndex] != -1)
+				continue;
+			if(steps + 1 > 128)
 				continue;
 			
 			tileQueue[last++] = tileX + diffX[i];

@@ -8,7 +8,7 @@
 #define MAX_FPS 120.0f
 
 #define TILE_SIZE 48.0f
-#define HUD_SIZE 16.0f
+#define HUD_SIZE 32.0f
 #define PLAYER_SPEED 8.0f
 
 //Buffers
@@ -30,6 +30,7 @@ enum Uniform
 	DEFAULT_UNIFORM_TEX_SIZE,
 	DEFAULT_UNIFORM_TEX_FRAC,
 	DEFAULT_UNIFORM_TEX_OFFSET,
+	DEFAULT_UNIFORM_HIT_COOLDOWN,
 
 	BACKGROUND_UNIFORM_SCALE,
 	BACKGROUND_UNIFORM_SCREEN_DIMENSIONS,
@@ -61,6 +62,5 @@ unsigned int getTexture(unsigned int texture);
 int getUniform(unsigned int uniform);
 GLBufferObj* getBuffer(unsigned int buffer);
 
-#endif
-
 #define INCLUDE_ROGUELIKE
+#endif

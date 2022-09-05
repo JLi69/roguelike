@@ -4,6 +4,7 @@
 #include "roguelike.h"
 
 static int keys[4] = { -1, -1, -1, -1 };
+static int winWidth = 960, winHeight = 540;
 
 void onKeyPress(GLFWwindow *win, int key, int scancode, int action, int mods)
 {
@@ -47,4 +48,17 @@ void handleWinResize(GLFWwindow *win, int newWidth, int newHeight)
 	glUniform2f(getUniform(BACKGROUND_UNIFORM_SCREEN_DIMENSIONS),
 				(float)newWidth,
 				(float)newHeight);
+	
+	winWidth = newWidth;
+	winHeight = newHeight;
+}
+
+int getWindowWidth()
+{
+	return winWidth;
+}
+
+int getWindowHeight()
+{
+	return winHeight;
 }

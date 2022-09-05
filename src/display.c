@@ -2,6 +2,10 @@
 #include "gl-func.h"
 #include <glad/glad.h>
 #include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
+#include "text.h"
+#include "event.h"
 
 void display(Level *level)
 {	
@@ -85,13 +89,46 @@ void display(Level *level)
 		glDrawArrays(GL_TRIANGLES, 0, 6);	
 	}
 
-	activateTexture(getTexture(SPRITE_TEXTURE_MAP), GL_TEXTURE0);	
+	activateTexture(getTexture(SPRITE_TEXTURE_MAP), GL_TEXTURE0);
+
+	//Draw the items that can be picked up
+	for(int i = 0; i < level->itemCount; i++)
+	{
+		if(level->items[i].hidden)
+			continue;
+
+		glUniform2f(getUniform(DEFAULT_UNIFORM_OFFSET),
+					level->items[i].hitbox.x * TILE_SIZE - level->player.spr.x * TILE_SIZE,
+					level->items[i].hitbox.y * TILE_SIZE - level->player.spr.y * TILE_SIZE);
+		switch(level->items[i].item)
+		{
+		case COIN:
+			glUniform2f(getUniform(DEFAULT_UNIFORM_TEX_OFFSET), 
+								   0.0f + 1.0f / 16.0f * (float)level->items[i].hitbox.frame,
+								   12.0f / 16.0f);	
+			break;
+		default:
+			break;	
+		}
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
 	
 	//Draw the enemies
-	//Sort the enemies
 	for(int i = 0; i < level->enemyCount; i++)
-	{
-		glUniform2f(getUniform(DEFAULT_UNIFORM_OFFSET), level->enemies[i].animationX * TILE_SIZE - level->player.spr.x * TILE_SIZE, level->enemies[i].animationY * TILE_SIZE - level->player.spr.y * TILE_SIZE);
+	{		
+		if(level->enemies[i].health <= 0 && level->enemies[i].damageCooldown <= 0.0f)
+			continue;
+		else if(level->enemies[i].health <= 0 && level->enemies[i].damageCooldown > 0.0f)	
+			glUniform1f(getUniform(DEFAULT_UNIFORM_HIT_COOLDOWN), 1.0f); 
+
+		if(level->enemies[i].damageCooldown >= 0.0f && level->enemies[i].health > 0)
+			glUniform1f(getUniform(DEFAULT_UNIFORM_HIT_COOLDOWN), level->enemies[i].damageCooldown * 2.0f); 
+		else if(level->enemies[i].health > 0)	
+			glUniform1f(getUniform(DEFAULT_UNIFORM_HIT_COOLDOWN), 0.0f); 
+
+		glUniform2f(getUniform(DEFAULT_UNIFORM_OFFSET),
+					level->enemies[i].animationX * TILE_SIZE - level->player.spr.x * TILE_SIZE,
+					level->enemies[i].animationY * TILE_SIZE - level->player.spr.y * TILE_SIZE);
 		switch(level->enemies[i].type)
 		{
 		case OPEN_CHEST_MONSTER:
@@ -106,8 +143,9 @@ void display(Level *level)
 			break;	
 		}
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-	}		
-	
+	}
+	glUniform1f(getUniform(DEFAULT_UNIFORM_HIT_COOLDOWN), 0.0f); 
+
 	//Draw the player				
 	glUniform2f(getUniform(DEFAULT_UNIFORM_OFFSET), 0.0f, 0.0f);
 	glUniform2f(getUniform(DEFAULT_UNIFORM_TEX_OFFSET), 
@@ -122,8 +160,8 @@ void display(Level *level)
 	for(int i = 0; i < level->player.maxHealth; i += 2)
 	{
 		glUniform2f(getUniform(DEFAULT_UNIFORM_OFFSET),
-					i * HUD_SIZE / 2 - level->player.maxHealth / 2 * HUD_SIZE / 2 + HUD_SIZE / 2,
-										 TILE_SIZE / 2 + HUD_SIZE);
+					i * HUD_SIZE / 2 + HUD_SIZE / 2 - level->player.maxHealth / 2 * HUD_SIZE / 2,
+					getWindowHeight() / 2.0f - HUD_SIZE);
 		if(level->player.health - i >= 2)	
 			glUniform2f(getUniform(DEFAULT_UNIFORM_TEX_OFFSET), 
 											0.0f / 16.0f,
@@ -139,5 +177,19 @@ void display(Level *level)
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
+	//Display the player's score
+	glUniform2f(getUniform(DEFAULT_UNIFORM_TEX_OFFSET), 
+						   10.0f / 16.0f,
+						   14.0f / 16.0f);	
+	glUniform2f(getUniform(DEFAULT_UNIFORM_OFFSET),	
+				-getDigits(level->player.score) * HUD_SIZE / 2.0f - HUD_SIZE / 2.0f,
+				getWindowHeight() / 2.0f - HUD_SIZE - HUD_SIZE * 1.5f);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	drawNumber(-getDigits(level->player.score) * HUD_SIZE / 2.0f + HUD_SIZE / 2.0f,
+			   getWindowHeight() / 2.0f - HUD_SIZE - HUD_SIZE * 1.5f,
+			   HUD_SIZE, level->player.score); 
+
+	//Print out any OpenGL errors
 	getGLErrors();
 }

@@ -27,6 +27,7 @@ struct Enemy createEnemy(struct Sprite spr, enum EnemyType type)
 	struct Enemy temp;
 
 	temp.timer = 0.0f;
+	temp.damageCooldown = 0.0f;
 
 	temp.spr = spr;
 	temp.type = type;
@@ -66,8 +67,7 @@ void updateSlime(struct Enemy *slime, int *stepsToPlayer, int levelWidth, int le
 	slime->spr.dY = 0.0f;
 	for(int i = 0; i < 4; i++)
 	{
-		int index = slimeX + diffX[i] + (slimeY + diffY[i]) * levelWidth;
-		
+		int index = slimeX + diffX[i] + (slimeY + diffY[i]) * levelWidth;		
 		//Out of bounds	
 		if(index < 0 || index >= levelWidth * levelHeight) 
 			continue;
@@ -81,7 +81,8 @@ void updateSlime(struct Enemy *slime, int *stepsToPlayer, int levelWidth, int le
 		int occupied = 0;	
 		for(int j = 0; j < enemyCount && !occupied; j++)	
 			if(otherEnemies[j].spr.x == slimeX + diffX[i] &&
-			   otherEnemies[j].spr.y == slimeY + diffY[i])
+			   otherEnemies[j].spr.y == slimeY + diffY[i] &&
+			   otherEnemies[j].health > 0)
 				occupied = 1;
 
 		if(stepsToPlayer[index] == steps - 1 && !occupied)
