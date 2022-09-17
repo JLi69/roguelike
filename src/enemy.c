@@ -9,7 +9,7 @@ static const int enemyHealthTable[] =
 
 static const int enemyScoreTable[] =
 {
-	32, //Chest monster
+	12, //Chest monster
 	1, //Slime
 };
 

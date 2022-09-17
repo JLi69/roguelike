@@ -48,7 +48,11 @@ void handleWinResize(GLFWwindow *win, int newWidth, int newHeight)
 	glUniform2f(getUniform(BACKGROUND_UNIFORM_SCREEN_DIMENSIONS),
 				(float)newWidth,
 				(float)newHeight);
-	
+	useProgram(getShader(ATTACK_ANIMATION_SHADER));
+	glUniform2f(getUniform(ATTACK_UNIFORM_SCREEN_DIMENSIONS),
+				(float)newWidth,
+				(float)newHeight);
+
 	winWidth = newWidth;
 	winHeight = newHeight;
 }

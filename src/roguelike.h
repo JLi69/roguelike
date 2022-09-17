@@ -16,11 +16,16 @@
 #define SQUARE 0
 
 //Shaders
-#define SHADER_COUNT 2
-#define DEFAULT_SHADER 0
-#define BACKGROUND_SHADER 1
+#define SHADER_COUNT 4
+enum ShaderIndex	
+{	
+	DEFAULT_SHADER,
+	BACKGROUND_SHADER,
+	ATTACK_ANIMATION_SHADER
+};
+
 //Uniforms
-#define UNIFORM_COUNT 16
+#define UNIFORM_COUNT 32
 enum Uniform
 { 
 	DEFAULT_UNIFORM_OFFSET, 
@@ -38,6 +43,10 @@ enum Uniform
 	BACKGROUND_UNIFORM_TEX_SIZE,
 	BACKGROUND_UNIFORM_TEX_FRAC,
 	BACKGROUND_UNIFORM_TEX_OFFSET,
+	
+	ATTACK_UNIFORM_SCREEN_DIMENSIONS,
+	ATTACK_UNIFORM_ANIMATION_TIME,
+	ATTACK_UNIFORM_DIRECTION
 };
 
 //Textures
@@ -57,7 +66,7 @@ void display(Level *level);
 //Update the sprites on a level
 void update(Level *level, struct timeval start);
 
-unsigned int getShader(unsigned int shader);
+unsigned int getShader(enum ShaderIndex shader);
 unsigned int getTexture(unsigned int texture);
 int getUniform(unsigned int uniform);
 GLBufferObj* getBuffer(unsigned int buffer);

@@ -13,6 +13,9 @@ void update(Level *level, struct timeval start)
 	static float totalTime = 0.0f;
 	static float damageCooldown = 0.0f;
 	static float ticker = 0.0f;
+	
+	static struct timeval end;
+	static float timePassed = 0.0f;
 
 	//Allocate memory for the "step array"
 	if(stepsToGoal == NULL)
@@ -60,30 +63,71 @@ void update(Level *level, struct timeval start)
 		level->player.spr.dX = 0.0f;
 	}
 
+	//Attack
+	if(checkKey(GLFW_KEY_SPACE) && level->player.attackCooldown <= 0.0f)
+	{
+		//Damage all enemies within range
+		for(int i = 0; i < level->enemyCount; i++)
+		{
+			//Enemy is dead
+			if(level->enemies[i].health <= 0)
+				continue;
+
+			//Check if the player is facing the enemy's direction
+			switch(level->player.spr.animation)
+			{
+			case IDLE_UP: case MOVING_UP:
+				if(level->enemies[i].spr.y < level->player.spr.y + 0.5f)
+					continue;
+				break;
+			case IDLE_DOWN: case MOVING_DOWN:
+				if(level->enemies[i].spr.y > level->player.spr.y - 0.5f)
+					continue;	
+				break;
+			case IDLE_RIGHT: case MOVING_RIGHT:
+				if(level->enemies[i].spr.x < level->player.spr.x - 0.5f)
+					continue;		
+				break;
+			case IDLE_LEFT: case MOVING_LEFT:
+				if(level->enemies[i].spr.x > level->player.spr.x + 0.5f)
+					continue;	
+				break;
+			}
+
+			//Enemy is in range
+			if(spriteDist(level->enemies[i].spr, level->player.spr) < 2.0f && level->enemies[i].damageCooldown <= 0.0f)
+			{
+				level->enemies[i].damageCooldown = 0.5f;
+				level->enemies[i].health--;
+			}
+
+			//Drop items upon death
+			if(level->enemies[i].health <= 0)
+			{
+				//Drop coins / treasure
+				for(int j = 0; j < getEnemyScoreVal(level->enemies[i].type); j++)
+				{
+					float dist = (float)rand() / (float)RAND_MAX * 0.4f,
+						  angle = (float)rand() / (float)RAND_MAX * 3.141592653f;
+					addItem(level, createItem(createSprite(level->enemies[i].animationX + dist * cosf(angle), level->enemies[i].animationY + dist * sinf(angle), 0.5f, 0.5f), COIN));
+				}
+			}
+		}
+
+		level->player.attackCooldown = ATTACK_COOLDOWN_LENGTH;
+	}
+
+	if(level->player.attackCooldown > 0.0f)
+		level->player.attackCooldown -= timePassed;
+
 	//Do a bfs if the player moved
 	if(level->player.spr.dX != 0.0f || level->player.spr.dY != 0.0f)
-	{
-		bfs(stepsToGoal, *level);	
-		//DEBUG DELETE LATER		
-		/*for(int i = 0; i < level->width * level->height; i++)
-		{
-			if(stepsToGoal[i] == -1)
-				printf(" - ");
-			else
-				printf(" %d ", stepsToGoal[i]);
-			if(i % level->width == level->width - 1)
-				printf("\n");
-		}
-		exit(0);*/
-	}
+		bfs(stepsToGoal, *level);			
 
 	//Enter = interact key
 	int interacting = 0;
 	if(checkKey(GLFW_KEY_ENTER))
-		interacting = 1;
-
-	static struct timeval end;
-	static float timePassed = 0.0f;	
+		interacting = 1;	
 
 	level->player.spr.x += level->player.spr.dX * timePassed;
 	//Player collision

@@ -112,10 +112,13 @@ void display(Level *level)
 		}
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
-	
+
 	//Draw the enemies
 	for(int i = 0; i < level->enemyCount; i++)
-	{		
+	{
+		if(spriteDist(level->enemies[i].spr, level->player.spr) > 32.0f)
+			continue;
+
 		if(level->enemies[i].health <= 0 && level->enemies[i].damageCooldown <= 0.0f)
 			continue;
 		else if(level->enemies[i].health <= 0 && level->enemies[i].damageCooldown > 0.0f)	
@@ -189,6 +192,15 @@ void display(Level *level)
 	drawNumber(-getDigits(level->player.score) * HUD_SIZE / 2.0f + HUD_SIZE / 2.0f,
 			   getWindowHeight() / 2.0f - HUD_SIZE - HUD_SIZE * 1.5f,
 			   HUD_SIZE, level->player.score); 
+
+	//Attack animation
+	if(level->player.attackCooldown > 0.0f)
+	{
+		useProgram(getShader(ATTACK_ANIMATION_SHADER));
+		glUniform1f(getUniform(ATTACK_UNIFORM_ANIMATION_TIME), ATTACK_COOLDOWN_LENGTH - level->player.attackCooldown);		
+		glUniform1i(getUniform(ATTACK_UNIFORM_DIRECTION), level->player.spr.animation / 2);	
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
 
 	//Print out any OpenGL errors
 	getGLErrors();

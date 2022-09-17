@@ -302,6 +302,7 @@ Level* genLevel(unsigned int seed, int levelNum)
 	level->player.health = 10;
 	level->player.maxHealth = 10;
 	level->player.score = 0;	
+	level->player.attackCooldown = 0.0f;
 
 	level->state = PLAYING;
 

@@ -1,4 +1,6 @@
 #ifndef INCLUDE_SPRITE
+#define ATTACK_COOLDOWN_LENGTH 0.15f
+
 enum AnimationState
 {
 	IDLE_DOWN = 0,
@@ -32,6 +34,7 @@ struct Player
 	struct Sprite spr;	
 	int health, maxHealth, //Amount of health the player has
 		score; //Score of the player
+	float attackCooldown;
 };
 
 struct Item

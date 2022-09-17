@@ -16,6 +16,7 @@ void init(void)
 	//Shaders
 	shaders[DEFAULT_SHADER] = createShaderProgram("res/shaders/vert.glsl", "res/shaders/texture-frag.glsl");	
 	shaders[BACKGROUND_SHADER] = createShaderProgram("res/shaders/background-vert.glsl", "res/shaders/texture-frag.glsl");	
+	shaders[ATTACK_ANIMATION_SHADER] = createShaderProgram("res/shaders/attack-vert.glsl", "res/shaders/attack-frag.glsl");	
 	//Set up uniforms
 	uniforms[DEFAULT_UNIFORM_OFFSET] = glGetUniformLocation(getShader(DEFAULT_SHADER), "uOffset");
 	uniforms[DEFAULT_UNIFORM_SCALE] = glGetUniformLocation(getShader(DEFAULT_SHADER), "uScale");
@@ -33,6 +34,10 @@ void init(void)
 	uniforms[BACKGROUND_UNIFORM_TEX_FRAC] = glGetUniformLocation(getShader(BACKGROUND_SHADER), "uTexFrac");
 	uniforms[BACKGROUND_UNIFORM_TEX_OFFSET] = glGetUniformLocation(getShader(BACKGROUND_SHADER), "uTexOffset");
 
+	uniforms[ATTACK_UNIFORM_SCREEN_DIMENSIONS] = glGetUniformLocation(getShader(ATTACK_ANIMATION_SHADER), "uScreenDimensions");
+	uniforms[ATTACK_UNIFORM_ANIMATION_TIME] = glGetUniformLocation(getShader(ATTACK_ANIMATION_SHADER), "uAnimationTime");
+	uniforms[ATTACK_UNIFORM_DIRECTION] = glGetUniformLocation(getShader(ATTACK_ANIMATION_SHADER), "uDirection");
+
 	//Textures	
 	//tex = loadTexture("res/textures/test.png");	
 	textures[TILE_TEXTURE_MAP] = loadTexture("res/textures/tiles.png");
@@ -48,7 +53,7 @@ void terminate(void)
 		free(buffers[i]);
 }
 
-unsigned int getShader(unsigned int shader)
+unsigned int getShader(enum ShaderIndex shader)
 {
 	return shaders[shader];
 }

@@ -34,7 +34,7 @@
  *		- Levels get bigger and have more enemies the farther you adventure [DONE]
  *			- 10 total levels
  *  - Enemies	
- *		- Slime (weakest)
+ *		- Slime (weakest) [DONE]
  *		- Snake
  *		- Spider
  *		- Ghost
