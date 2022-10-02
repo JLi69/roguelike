@@ -28,6 +28,9 @@
  *					- Graveyard
  *					- Garden
  *					- Prison
+ *					- Treasure room?
+ *					- Throne room?
+ *					- Snake room?
  *		- Generate enemy locations
  *		- Generate power up locations
  *		- Generate loot locations 
@@ -35,9 +38,10 @@
  *			- 10 total levels
  *  - Enemies	
  *		- Slime (weakest) [DONE]
- *		- Snake
- *		- Spider
+ *		- Snake [DONE]
+ *		- Skeleton?
  *		- Ghost
+ *			- Can move through walls
  *		- Demon (strongest)
  *		- Final boss?
  *  - Power ups
@@ -47,6 +51,8 @@
  *		- Metal Sword, Admantine Sword, Demon Sword
  *		- Bomb
  *  - Art
+ *
+ *  - Create Binary Search Tree Data structure for better performance
  */
 
 int main(void)

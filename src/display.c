@@ -144,8 +144,53 @@ void display(Level *level)
 								   0.0f + 1.0f / 16.0f * (float)level->enemies[i].spr.frame + 2.0f * 1.0f / 16.0f,
 								   14.0f / 16.0f);
 			break;	
+		case SNAKE:
+			if(level->enemies[i].spr.x <= level->player.spr.x)
+			{
+				glUniform2f(getUniform(DEFAULT_UNIFORM_TEX_OFFSET), 
+								   0.0f + 1.0f / 16.0f * (float)level->enemies[i].spr.frame + 2.0f * 1.0f / 16.0f,
+								   13.0f / 16.0f);
+			}
+			else if(level->enemies[i].spr.x > level->player.spr.x)
+			{
+				glUniform2f(getUniform(DEFAULT_UNIFORM_TEX_OFFSET), 
+								   0.0f + 1.0f / 16.0f * (float)level->enemies[i].spr.frame,
+								   13.0f / 16.0f);
+			}
+			break;
+		case GHOST:
+			glUniform1f(getUniform(DEFAULT_UNIFORM_ALPHA), 0.3f);		
+			if(level->enemies[i].spr.x <= level->player.spr.x)
+			{
+				glUniform2f(getUniform(DEFAULT_UNIFORM_TEX_OFFSET), 
+								   0.0f + 1.0f / 16.0f * (float)level->enemies[i].spr.frame + 6.0f * 1.0f / 16.0f,
+								   13.0f / 16.0f);
+			}
+			else if(level->enemies[i].spr.x > level->player.spr.x)
+			{
+				glUniform2f(getUniform(DEFAULT_UNIFORM_TEX_OFFSET), 
+								   4.0f / 16.0f + 1.0f / 16.0f * (float)level->enemies[i].spr.frame,
+								   13.0f / 16.0f);
+			}	
+			break;
+		case SKULL:
+			if(level->enemies[i].spr.x <= level->player.spr.x)
+			{
+				glUniform2f(getUniform(DEFAULT_UNIFORM_TEX_OFFSET), 
+								   4.0f / 16.0f + 1.0f / 16.0f * (float)level->enemies[i].spr.frame,
+								   14.0f / 16.0f);
+			}
+			else if(level->enemies[i].spr.x > level->player.spr.x)
+			{
+				glUniform2f(getUniform(DEFAULT_UNIFORM_TEX_OFFSET), 
+								   4.0f / 16.0f + 1.0f / 16.0f * (float)level->enemies[i].spr.frame + 2.0f / 16.0f,
+								   14.0f / 16.0f);
+			}	
+			break;	
+			break;
 		}
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glUniform1f(getUniform(DEFAULT_UNIFORM_ALPHA), 1.0f);		
 	}
 	glUniform1f(getUniform(DEFAULT_UNIFORM_HIT_COOLDOWN), 0.0f); 
 

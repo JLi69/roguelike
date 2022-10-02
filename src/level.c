@@ -278,7 +278,7 @@ Level* genLevel(unsigned int seed, int levelNum)
 		for(int j = 0; j < level->height; j++)
 			if(level->tiles[i + j * level->width] == FLOOR && rand() % 72 == 0 &&
 				(labs(startX - i) > 6 || labs(startY - j) > 6)) //Don't spawn too close the player
-				addEnemy(level, createEnemy(createSprite(i, j, 1.0f, 1.0f), SLIME));	
+				addEnemy(level, createEnemy(createSprite(i, j, 1.0f, 1.0f), SLIME + rand() % (ENEMY_TYPE_COUNT - 1)));	
 
 	//Deallocate the stacks
 	stack_destroy(potentialRooms);

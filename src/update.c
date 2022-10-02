@@ -269,7 +269,10 @@ void update(Level *level, struct timeval start)
 		//Update the enemy position
 		switch(level->enemies[i].type)
 		{
-		case SLIME:		updateSlime(&level->enemies[i], stepsToGoal, level->width, level->height, level->enemies, level->enemyCount, timePassed);		break;
+		case SLIME:		updateEnemy(&level->enemies[i], stepsToGoal, level->width, level->height, level->enemies, level->enemyCount, timePassed, SLIME_UPDATE_TIME, SLIME_MOVEMENT_TIME, 16);		break;
+		case SNAKE:		updateEnemy(&level->enemies[i], stepsToGoal, level->width, level->height, level->enemies, level->enemyCount, timePassed, SNAKE_UPDATE_TIME, SNAKE_MOVEMENT_TIME, 32);		break;	
+		case GHOST:		updateGhostEnemy(&level->enemies[i], level->player, level->enemies, level->enemyCount, timePassed, GHOST_SPEED, MAX_GHOST_DIST);											break;
+		case SKULL:  updateEnemy(&level->enemies[i], stepsToGoal, level->width, level->height, level->enemies, level->enemyCount, timePassed, SKULL_UPDATE_TIME, SKULL_MOVEMENT_TIME, 32); break;
 		default:		break;
 		}
 
