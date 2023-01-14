@@ -107,6 +107,8 @@ unsigned int readShaderFile(const char *path, int type)
 	for(int i = 0; i < 4096; i++) src[i] = ' ';	
 	//Read the file
 	while((*ptr++ = getc(srcFile)) != EOF);
+	//Null terminate the source code
+	*--ptr = '\0';
 
 	//printf("%s\n", src);
 

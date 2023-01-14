@@ -6,13 +6,15 @@
 #define SNAKE_MOVEMENT_TIME 0.25f
 #define SNAKE_UPDATE_TIME 0.75f
 #define SKULL_MOVEMENT_TIME 0.25f
-#define SKULL_UPDATE_TIME 0.5f
+#define SKULL_UPDATE_TIME 0.6f
+#define EYE_MOVEMENT_TIME 0.2f
+#define EYE_UPDATE_TIME 0.7f
 
 #define GHOST_SPEED 2.0f
 #define MAX_GHOST_DIST 12.0f
 
 //Number of types of enemies
-#define ENEMY_TYPE_COUNT 5
+#define ENEMY_TYPE_COUNT 6
 
 enum EnemyType
 {
@@ -20,7 +22,8 @@ enum EnemyType
 	SLIME,
 	SNAKE,
 	GHOST,
-	SKULL
+	SKULL,
+	EYEBALL
 };
 
 struct Enemy

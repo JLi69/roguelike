@@ -49,6 +49,8 @@ struct Item createItem(struct Sprite hitbox, enum Items item);
 int colliding(struct Sprite s1, struct Sprite s2);
 float spriteDist(struct Sprite s1, struct Sprite s2);
 void updateAnimationFrame(struct Sprite *spr, float totalTime);
+void updateAnimationFrameCustom(struct Sprite *spr, float totalTime, int frameCount, float animTime);
+void updateAnimationFrameCustomLoop(struct Sprite *spr, float totalTime, int frameCount, float animTime);
 
 #endif
 

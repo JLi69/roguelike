@@ -239,8 +239,13 @@ void update(Level *level, struct timeval start)
 			level->enemies[i].damageCooldown -= timePassed * 4.0f; //Enemy turns red upon death and then disappears	
 			continue;
 		}
+		
+		switch(level->enemies[i].type)
+		{
+		case EYEBALL:	updateAnimationFrameCustomLoop(&level->enemies[i].spr, totalTime, 4, 0.2f);		break;
+		default:		updateAnimationFrame(&level->enemies[i].spr, totalTime);					break;	
+		}	
 
-		updateAnimationFrame(&level->enemies[i].spr, totalTime);
 		//Check if the player is colliding with any of them and damage the player if it is
 		if(colliding(level->player.spr, level->enemies[i].spr) && damageCooldown <= 0.0f)
 		{
@@ -272,7 +277,8 @@ void update(Level *level, struct timeval start)
 		case SLIME:		updateEnemy(&level->enemies[i], stepsToGoal, level->width, level->height, level->enemies, level->enemyCount, timePassed, SLIME_UPDATE_TIME, SLIME_MOVEMENT_TIME, 16);		break;
 		case SNAKE:		updateEnemy(&level->enemies[i], stepsToGoal, level->width, level->height, level->enemies, level->enemyCount, timePassed, SNAKE_UPDATE_TIME, SNAKE_MOVEMENT_TIME, 32);		break;	
 		case GHOST:		updateGhostEnemy(&level->enemies[i], level->player, level->enemies, level->enemyCount, timePassed, GHOST_SPEED, MAX_GHOST_DIST);											break;
-		case SKULL:  updateEnemy(&level->enemies[i], stepsToGoal, level->width, level->height, level->enemies, level->enemyCount, timePassed, SKULL_UPDATE_TIME, SKULL_MOVEMENT_TIME, 32); break;
+		case SKULL:		updateEnemy(&level->enemies[i], stepsToGoal, level->width, level->height, level->enemies, level->enemyCount, timePassed, SKULL_UPDATE_TIME, SKULL_MOVEMENT_TIME, 32);		break;
+		case EYEBALL:	updateEnemy(&level->enemies[i], stepsToGoal, level->width, level->height, level->enemies, level->enemyCount, timePassed, EYE_UPDATE_TIME, EYE_MOVEMENT_TIME, 64);			break;
 		default:		break;
 		}
 

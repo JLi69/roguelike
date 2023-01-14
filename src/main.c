@@ -24,7 +24,6 @@
  *			- Rooms are bit boring, fill them up with something?
  *				- Room Types?
  *					- Slime Room
- *					- Spider Room
  *					- Graveyard
  *					- Garden
  *					- Prison

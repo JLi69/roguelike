@@ -10,6 +10,7 @@ static const int enemyHealthTable[] =
 	4, //Snake
 	8, //Ghost
 	6, //Skull
+	8, //Eyeball
 };
 
 static const int enemyScoreTable[] =
@@ -19,6 +20,7 @@ static const int enemyScoreTable[] =
 	2, //Snake
 	5, //Ghost
 	3, //Skull
+	8, //Eyeball
 };
 
 static const int enemyHitTable[] =
@@ -28,6 +30,7 @@ static const int enemyHitTable[] =
 	2, //Snake
 	1, //Ghost
 	3, //Skull
+	5, //Eyeball
 };
 
 static const int diffX[] = {  -1,  0,   1,   0 };

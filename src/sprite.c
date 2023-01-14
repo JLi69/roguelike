@@ -55,8 +55,19 @@ float spriteDist(struct Sprite s1, struct Sprite s2)
 
 void updateAnimationFrame(struct Sprite *spr, float totalTime)
 {	
-	if((int)floorf(totalTime / ANIMATION_TIME) % 2 == 0)
-		spr->frame = 0;
-	else if((int)floorf(totalTime / ANIMATION_TIME) % 2 == 1)
-		spr->frame = 1;
+	spr->frame = (int)floorf(totalTime / ANIMATION_TIME) % 2; 
+}
+
+void updateAnimationFrameCustom(struct Sprite *spr, float totalTime, int frameCount, float animTime)
+{	
+	spr->frame = (int)floorf(totalTime / animTime) % frameCount; 
+}
+
+void updateAnimationFrameCustomLoop(struct Sprite *spr, float totalTime, int frameCount, float animTime)
+{
+	int frame = (int)floorf(totalTime / animTime);
+	frame %= (2 * frameCount);
+
+	if(frame < frameCount) spr->frame = frame;
+	else if(frame >= frameCount) spr->frame = frameCount - 1 - frame % frameCount;
 }

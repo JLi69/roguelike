@@ -186,7 +186,11 @@ void display(Level *level)
 								   4.0f / 16.0f + 1.0f / 16.0f * (float)level->enemies[i].spr.frame + 2.0f / 16.0f,
 								   14.0f / 16.0f);
 			}	
-			break;	
+			break;
+		case EYEBALL:
+			glUniform2f(getUniform(DEFAULT_UNIFORM_TEX_OFFSET), 
+								   8.0f / 16.0f + 1.0f / 16.0f * (float)level->enemies[i].spr.frame,
+								   14.0f / 16.0f);
 			break;
 		}
 		glDrawArrays(GL_TRIANGLES, 0, 6);
