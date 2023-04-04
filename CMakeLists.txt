@@ -9,15 +9,9 @@ add_custom_target(
 	COMMAND ./${PROJECT_NAME}	
 	)
 
-add_custom_target(
-	lib_glad
-	COMMAND cd lib/glad && make	
-	)
-
 find_package(OpenGL REQUIRED)
 
-add_subdirectory(lib/glad)
-
+include_directories(glad/include)
 aux_source_directory(src source)
 aux_source_directory(lib deps)
 
@@ -26,10 +20,9 @@ add_executable(
 
 	${source}
 	${deps}
+	glad/src/glad.c
 )
 
 #Link with libraries
-add_dependencies(${PROJECT_NAME} lib_glad)
 target_link_libraries(${PROJECT_NAME} glfw3 m)
 target_link_libraries(${PROJECT_NAME} SOIL2 m OpenGL::GL)
-target_link_libraries(${PROJECT_NAME} ${CMAKE_BINARY_DIR}/lib/glad/libglad.a)
